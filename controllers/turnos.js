@@ -35,6 +35,8 @@ module.exports = function (app) {
             atendido: req.body.atendido
         });
 
+        
+
         turno.save(function (err, turno) {
             if (err) return res.status(500).send(err.message);
             res.status(200).jsonp(turno);
