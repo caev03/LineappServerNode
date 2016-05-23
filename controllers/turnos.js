@@ -15,14 +15,30 @@ module.exports = function (app) {
         });
     };
 
-    findById = function (req, res) {
-        Turno.findById(req.params.id, function (err, turno) {
-            if (err) return res.send(500, err.message);
+    tieneTurno = function (req, res)
+    {
+        query = {'idUsuario' : req.params.id, 'atendido':false};
+        Turno.find(query, function (err, turno)
+        {
+            if (err) res.send(500, err.message);
 
-            console.log('GET /turnos/' + req.params.id);
-            res.status(200).jsonp(turno);
+            console.log('GET /turnos')
+            res.status(200).jsonp(turno.length);
         });
     };
+
+    darTurnoDep = function (req, res)
+    {
+        query = {'departamento':req.params.id}
+        Turno.find(query, function (err, turno)
+        {
+            console.log(req.params.id);
+            if (err) res.send(500, err.message);
+
+            console.log('GET /turnos')
+            res.status(200).jsonp((turno.length!=0)?turno[turno.length-1].numero:"start");
+        });
+    }
 
     addTurno = function (req, res) {
         console.log('POST');
@@ -43,14 +59,16 @@ module.exports = function (app) {
         });
     };
 
-    updateUsuario = function (req, res) {
-        turno.findById(req.params.id, function (err, turno) {
-            turno.turnoId= req.body.turnoId;
-            turno.cedula=    req.body.cedula;
-            turno.nombre=    req.body.nombre;
-            turno.numCelular=req.body.numCelular;
+    updateTurno = function (req, res)
+    {
+        query = {'idUsuario' : req.params.id};
+        Turno.find(query, function (err, turno)
+        {
+            console.log(req.params.id);
+            console.log(turno);
+            turno[0].atendido = true;
 
-            turno.save(function (err) {
+            turno[0].save(function (err) {
                 if (err) return res.status(500).send(err.message);
                 res.status(200).jsonp(turno);
             });
@@ -68,9 +86,10 @@ module.exports = function (app) {
 
 //Link routes and functions
     app.get('/turnos', findAllTurnos);
-    app.get('/turnos/:id', findById);
+    app.get('/turnos/:id', tieneTurno);
+    app.get('/turnosDep/:id',darTurnoDep);
     app.post('/turnos', addTurno);
-    app.put('/turnos/:id', updateUsuario);
+    app.put('/turnos/:id', updateTurno);
     app.delete('/turnos/:id', deleteUsuario);
 }
 
