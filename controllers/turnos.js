@@ -29,16 +29,40 @@ module.exports = function (app) {
 
     darTurnoDep = function (req, res)
     {
-        query = {'departamento':req.params.id}
+        query = {'departamento':req.params.id};
         Turno.find(query, function (err, turno)
         {
             console.log(req.params.id);
             if (err) res.send(500, err.message);
 
-            console.log('GET /turnos')
+            console.log('GET /turnos');
             res.status(200).jsonp((turno.length!=0)?turno[turno.length-1].numero:"start");
         });
-    }
+    };
+
+    darTurnoActualDep = function (req, res)
+    {
+        query = {'idUsuario':req.params.id,'atendido':false};
+        Turno.find(query, function (err, turno)
+        {
+            console.log(req.params.id);
+            if (err) res.send(500, err.message);
+            if(turno.length!=0)
+            {
+                query = {'departamento':turno[0].departamento, 'atendido': false}
+                Turno.find(query, function (err, turno) {
+                    console.log(req.params.id);
+                    if (err) res.send(500, err.message);
+                    res.status(200).jsonp((turno.length!=0)?turno[0].numero:"start");
+                })
+            }
+            else
+            {
+                res.status(200).jsonp("start");
+            }
+
+        });
+    };
 
     addTurno = function (req, res) {
         console.log('POST');
@@ -61,7 +85,7 @@ module.exports = function (app) {
 
     updateTurno = function (req, res)
     {
-        query = {'idUsuario' : req.params.id};
+        query = {'idUsuario' : req.params.id, 'atendido':false};
         Turno.find(query, function (err, turno)
         {
             console.log(req.params.id);
@@ -84,10 +108,23 @@ module.exports = function (app) {
         });
     };
 
+    getTurno = function (req, res) {
+        query = {'idUsuario' : req.params.id, 'atendido':false};
+        Turno.find(query, function (err, turno)
+        {
+            if (err) res.send(500, err.message);
+
+            console.log(turno)
+            res.status(200).jsonp(turno);
+        });
+    }
+
 //Link routes and functions
     app.get('/turnos', findAllTurnos);
     app.get('/turnos/:id', tieneTurno);
+    app.get('/turnoActual/:id', getTurno);
     app.get('/turnosDep/:id',darTurnoDep);
+    app.get('/turnoActualDep/:id',darTurnoActualDep);
     app.post('/turnos', addTurno);
     app.put('/turnos/:id', updateTurno);
     app.delete('/turnos/:id', deleteUsuario);
